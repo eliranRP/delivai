@@ -11,7 +11,7 @@ services:
       cd apps/shopify-app &&
       npx prisma generate &&
       pnpm --filter shopify-app build
-    startCommand: cd apps/shopify-app && npx remix-serve ./build/server/index.js
+    startCommand: cd apps/shopify-app && node_modules/.bin/remix-serve ./build/server/index.js
     healthCheckPath: /health
     envVars:
       - key: NODE_ENV
