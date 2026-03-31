@@ -1,0 +1,221 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ─── Shopify session storage (required by @shopify/shopify-app-session-storage-prisma) ───
+
+model Session {
+  id            String    @id
+  shop          String
+  state         String
+  isOnline      Boolean   @default(false)
+  scope         String?
+  expires       DateTime?
+  accessToken   String
+  userId        BigInt?
+  firstName     String?
+  lastName      String?
+  email         String?
+  accountOwner  Boolean   @default(false)
+  locale        String?
+  collaborator  Boolean?  @default(false)
+  emailVerified Boolean?  @default(false)
+}
+
+// ─── Store (multi-tenant root) ────────────────────────────────────────────────
+
+model Store {
+  id            String    @id @default(cuid())
+  shopDomain    String    @unique
+  accessToken   String
+  installedAt   DateTime  @default(now())
+  gdprDeletedAt DateTime?
+
+  aiConfig        AIConfig?
+  subscription    Subscription?
+  conversations   Conversation[]
+  agents          Agent[]
+  macros          Macro[]
+  tags            Tag[]
+  knowledgeChunks KnowledgeChunk[]
+}
+
+// ─── AI Configuration (per store, BYOK) ──────────────────────────────────────
+
+model AIConfig {
+  id                    String   @id @default(cuid())
+  storeId               String   @unique
+  claudeApiKey          String   // AES-256-GCM encrypted
+  easyPostApiKey        String?  // AES-256-GCM encrypted
+  systemPromptOverride  String?
+  autoEscalateThreshold Float    @default(0.4)
+  greetingMessage       String   @default("Hi! I can help you track or manage your order. What can I help you with today?")
+  widgetColor           String   @default("#5B4FE8")
+  widgetPosition        String   @default("bottom-right")
+  collectEmailUpfront   Boolean  @default(false)
+  aiPersonaName         String   @default("Aria")
+  updatedAt             DateTime @updatedAt
+
+  store Store @relation(fields: [storeId], references: [id], onDelete: Cascade)
+}
+
+// ─── Billing ──────────────────────────────────────────────────────────────────
+
+model Subscription {
+  id                  String    @id @default(cuid())
+  storeId             String    @unique
+  shopifyChargeId     String?
+  shopifyConfirmUrl   String?
+  plan                String    @default("starter") // starter|growth|scale
+  status              String    @default("pending")  // pending|active|cancelled|frozen|expired
+  conversationsUsed   Int       @default(0)
+  trialEndsAt         DateTime?
+  currentPeriodEnd    DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  store Store @relation(fields: [storeId], references: [id], onDelete: Cascade)
+}
+
+// ─── Conversations ────────────────────────────────────────────────────────────
+
+model Conversation {
+  id                 String    @id @default(cuid())
+  storeId            String
+  customerId         String?   // Shopify customer GID
+  anonymousSessionId String?   @unique
+  customerEmail      String?
+  customerName       String?
+  linkedAt           DateTime?
+  status             String    @default("open")   // open|pending|resolved|closed
+  priority           String    @default("medium") // low|medium|high|urgent
+  assignedAgentId    String?
+  aiHandled          Boolean   @default(true)
+  escalatedAt        DateTime?
+  resolvedAt         DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  store     Store             @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  messages  Message[]
+  toolCalls ToolCall[]
+  tags      ConversationTag[]
+
+  @@index([storeId, status])
+  @@index([storeId, customerId])
+  @@index([storeId, createdAt(sort: Desc)])
+}
+
+// ─── Messages ─────────────────────────────────────────────────────────────────
+
+model Message {
+  id             String   @id @default(cuid())
+  conversationId String
+  role           String   // customer|assistant|agent
+  content        String
+  isInternal     Boolean  @default(false)
+  createdAt      DateTime @default(now())
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId, createdAt])
+}
+
+// ─── Tool Calls ───────────────────────────────────────────────────────────────
+
+model ToolCall {
+  id             String    @id @default(cuid())
+  conversationId String
+  toolName       String
+  input          Json
+  output         Json?
+  status         String    @default("pending") // pending|success|error
+  errorMessage   String?
+  executedAt     DateTime?
+  createdAt      DateTime  @default(now())
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId, createdAt])
+}
+
+// ─── Agents ───────────────────────────────────────────────────────────────────
+
+model Agent {
+  id          String   @id @default(cuid())
+  storeId     String
+  name        String
+  email       String
+  role        String   @default("agent") // agent|manager
+  isAvailable Boolean  @default(true)
+  avatarUrl   String?
+  createdAt   DateTime @default(now())
+
+  store Store @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  @@unique([storeId, email])
+}
+
+// ─── Macros (canned responses) ────────────────────────────────────────────────
+
+model Macro {
+  id         String   @id @default(cuid())
+  storeId    String
+  name       String
+  body       String
+  category   String?
+  usageCount Int      @default(0)
+  createdAt  DateTime @default(now())
+
+  store Store @relation(fields: [storeId], references: [id], onDelete: Cascade)
+}
+
+// ─── Tags ─────────────────────────────────────────────────────────────────────
+
+model Tag {
+  id      String @id @default(cuid())
+  storeId String
+  name    String
+  color   String @default("#5B4FE8")
+
+  store         Store             @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  conversations ConversationTag[]
+
+  @@unique([storeId, name])
+}
+
+model ConversationTag {
+  conversationId String
+  tagId          String
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  tag          Tag          @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([conversationId, tagId])
+}
+
+// ─── Knowledge Base ───────────────────────────────────────────────────────────
+
+model KnowledgeChunk {
+  id        String   @id @default(cuid())
+  storeId   String
+  type      String   // product|faq|policy
+  sourceId  String   // Shopify product GID or manual slug
+  content   String
+  metadata  Json     @default("{}")
+  updatedAt DateTime @updatedAt
+
+  store Store @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  @@index([storeId, type])
+  @@unique([storeId, sourceId])
+}
+// Note: pgvector `embedding` column added via raw migration:
+//   ALTER TABLE "KnowledgeChunk" ADD COLUMN IF NOT EXISTS embedding vector(1536);
+//   CREATE INDEX ON "KnowledgeChunk" USING ivfflat (embedding vector_cosine_ops) WITH (lists = 100);

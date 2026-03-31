@@ -1,0 +1,17 @@
+node_modules
+.env
+.env.*
+!.env.example
+.DS_Store
+*.log
+.next
+build
+dist
+.turbo
+.shopify
+prisma/dev.db
+prisma/dev.db-journal
+*.tsbuildinfo
+
+*storybook.log
+storybook-static

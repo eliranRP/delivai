@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "include": ["**/*.ts", "**/*.tsx", "**/*.d.ts"],
+  "exclude": ["node_modules", ".cache", "build", "public/build", "scripts"],
+  "compilerOptions": {
+    "lib": ["DOM", "DOM.Iterable", "ES2022"],
+    "types": ["node", "@types/react", "@types/react-dom"],
+    "isolatedModules": true,
+    "jsx": "react-jsx",
+    "paths": {
+      "~/*": ["./app/*"]
+    }
+  }
+}

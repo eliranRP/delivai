@@ -1,0 +1,370 @@
+/* DelivAI Chat Widget — Storefront Styles */
+:root {
+  --delivai-primary: #5B4FE8;
+  --delivai-primary-dark: #4a3fd6;
+  --delivai-surface: #ffffff;
+  --delivai-bg: #f8f7ff;
+  --delivai-text: #1a1a2e;
+  --delivai-text-muted: #6b7280;
+  --delivai-border: #e5e7eb;
+  --delivai-shadow: 0 20px 60px rgba(0,0,0,0.15), 0 4px 20px rgba(91,79,232,0.12);
+  --delivai-radius: 16px;
+  --delivai-radius-sm: 8px;
+  --delivai-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --delivai-transition: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --delivai-z: 2147483647;
+}
+
+.delivai-widget {
+  position: fixed;
+  z-index: var(--delivai-z);
+  font-family: var(--delivai-font);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--delivai-text);
+  box-sizing: border-box;
+}
+
+.delivai-widget *, .delivai-widget *::before, .delivai-widget *::after {
+  box-sizing: border-box;
+}
+
+/* ── Launcher Button ─────────────────────────────────────────────────────── */
+.delivai-launcher {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 20px rgba(91,79,232,0.4);
+  transition: transform var(--delivai-transition), box-shadow var(--delivai-transition);
+  position: relative;
+  overflow: hidden;
+}
+
+.delivai-launcher:hover {
+  transform: scale(1.08);
+  box-shadow: 0 6px 28px rgba(91,79,232,0.5);
+}
+
+.delivai-launcher:active { transform: scale(0.96); }
+
+.delivai-launcher svg {
+  width: 24px;
+  height: 24px;
+  fill: white;
+  transition: transform var(--delivai-transition), opacity var(--delivai-transition);
+  position: absolute;
+}
+
+.delivai-launcher .icon-chat { opacity: 1; transform: scale(1); }
+.delivai-launcher .icon-close { opacity: 0; transform: scale(0.6); }
+
+.delivai-launcher.open .icon-chat { opacity: 0; transform: scale(0.6); }
+.delivai-launcher.open .icon-close { opacity: 1; transform: scale(1); }
+
+.delivai-launcher .unread-badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: #ef4444;
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid white;
+  transform: scale(0);
+  transition: transform var(--delivai-transition);
+}
+
+.delivai-launcher .unread-badge.visible { transform: scale(1); }
+
+/* ── Chat Panel ──────────────────────────────────────────────────────────── */
+.delivai-panel {
+  position: absolute;
+  bottom: 72px;
+  width: 360px;
+  height: 520px;
+  background: var(--delivai-surface);
+  border-radius: var(--delivai-radius);
+  box-shadow: var(--delivai-shadow);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transform-origin: bottom right;
+  transition: opacity var(--delivai-transition), transform var(--delivai-transition);
+}
+
+.delivai-widget.position-right .delivai-panel { right: 0; }
+.delivai-widget.position-left .delivai-panel { left: 0; }
+
+.delivai-panel.hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.9) translateY(8px);
+}
+
+/* ── Header ──────────────────────────────────────────────────────────────── */
+.delivai-header {
+  padding: 16px 16px 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--delivai-border);
+}
+
+.delivai-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 700;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.delivai-header-info { flex: 1; min-width: 0; }
+.delivai-header-name { font-weight: 600; font-size: 14px; }
+.delivai-header-status { font-size: 12px; color: var(--delivai-text-muted); display: flex; align-items: center; gap: 4px; }
+.delivai-status-dot { width: 6px; height: 6px; border-radius: 50%; background: #10b981; flex-shrink: 0; }
+
+.delivai-close-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  color: var(--delivai-text-muted);
+  border-radius: 6px;
+  display: flex;
+  transition: background var(--delivai-transition);
+}
+.delivai-close-btn:hover { background: var(--delivai-bg); }
+
+/* ── Messages ────────────────────────────────────────────────────────────── */
+.delivai-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  scroll-behavior: smooth;
+}
+
+.delivai-messages::-webkit-scrollbar { width: 4px; }
+.delivai-messages::-webkit-scrollbar-track { background: transparent; }
+.delivai-messages::-webkit-scrollbar-thumb { background: var(--delivai-border); border-radius: 4px; }
+
+.delivai-message {
+  display: flex;
+  flex-direction: column;
+  max-width: 85%;
+  animation: delivai-slide-in 200ms ease-out;
+}
+@keyframes delivai-slide-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.delivai-message.from-user { align-self: flex-end; align-items: flex-end; }
+.delivai-message.from-assistant { align-self: flex-start; align-items: flex-start; }
+
+.delivai-bubble {
+  padding: 10px 14px;
+  border-radius: 16px;
+  font-size: 14px;
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+.from-user .delivai-bubble {
+  color: white;
+  border-bottom-right-radius: 4px;
+}
+
+.from-assistant .delivai-bubble {
+  background: var(--delivai-bg);
+  color: var(--delivai-text);
+  border-bottom-left-radius: 4px;
+}
+
+.delivai-timestamp {
+  font-size: 11px;
+  color: var(--delivai-text-muted);
+  margin-top: 4px;
+  padding: 0 4px;
+}
+
+/* ── Tool Call Card ──────────────────────────────────────────────────────── */
+.delivai-tool-card {
+  background: white;
+  border: 1px solid var(--delivai-border);
+  border-radius: var(--delivai-radius-sm);
+  padding: 12px;
+  font-size: 13px;
+  margin-top: 8px;
+  width: 100%;
+  max-width: 100%;
+}
+
+.delivai-tool-card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--delivai-text);
+}
+
+.delivai-tool-icon {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  flex-shrink: 0;
+}
+
+.delivai-order-row { display: flex; justify-content: space-between; padding: 4px 0; }
+.delivai-order-label { color: var(--delivai-text-muted); }
+.delivai-order-value { font-weight: 500; }
+
+.delivai-tracking-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* ── Typing Indicator ────────────────────────────────────────────────────── */
+.delivai-typing {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 14px;
+  background: var(--delivai-bg);
+  border-radius: 16px;
+  border-bottom-left-radius: 4px;
+  align-self: flex-start;
+  width: fit-content;
+}
+
+.delivai-typing-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--delivai-text-muted);
+  animation: delivai-bounce 1.4s infinite;
+}
+.delivai-typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.delivai-typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes delivai-bounce {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
+  30% { transform: translateY(-6px); opacity: 1; }
+}
+
+/* ── Escalated Banner ────────────────────────────────────────────────────── */
+.delivai-escalated-banner {
+  background: #fef3c7;
+  border: 1px solid #fbbf24;
+  border-radius: var(--delivai-radius-sm);
+  padding: 10px 12px;
+  font-size: 13px;
+  color: #92400e;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  align-self: stretch;
+}
+
+/* ── Input Area ──────────────────────────────────────────────────────────── */
+.delivai-footer {
+  padding: 12px 16px;
+  border-top: 1px solid var(--delivai-border);
+  background: var(--delivai-surface);
+  flex-shrink: 0;
+}
+
+.delivai-input-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  background: var(--delivai-bg);
+  border-radius: 24px;
+  padding: 8px 8px 8px 14px;
+  border: 1px solid var(--delivai-border);
+  transition: border-color var(--delivai-transition);
+}
+
+.delivai-input-row:focus-within { border-color: var(--delivai-primary); }
+
+.delivai-input {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  font-size: 14px;
+  font-family: var(--delivai-font);
+  color: var(--delivai-text);
+  resize: none;
+  max-height: 120px;
+  min-height: 22px;
+  line-height: 1.5;
+}
+
+.delivai-input::placeholder { color: var(--delivai-text-muted); }
+
+.delivai-send-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform var(--delivai-transition), opacity var(--delivai-transition);
+  color: white;
+}
+.delivai-send-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+.delivai-send-btn:not(:disabled):hover { transform: scale(1.08); }
+
+.delivai-powered {
+  text-align: center;
+  font-size: 11px;
+  color: var(--delivai-text-muted);
+  margin-top: 8px;
+}
+
+/* ── Mobile responsive ───────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .delivai-panel {
+    position: fixed;
+    bottom: 0 !important;
+    right: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100dvh !important;
+    border-radius: var(--delivai-radius) var(--delivai-radius) 0 0;
+    transform-origin: bottom center;
+  }
+}

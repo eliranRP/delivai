@@ -1,0 +1,37 @@
+name = "delivai"
+client_id = "e39564564d687d4fc3d0465f86add31b"
+application_url = "https://delivai-shopify-app.onrender.com"
+embedded = true
+
+[build]
+  automatically_update_urls_on_dev = true
+  dev_store_url = "commai-chat.myshopify.com"
+
+[access_scopes]
+  scopes = "read_orders,write_orders,read_customers,write_customers,read_products,read_fulfillments,write_fulfillments"
+
+[auth]
+  redirect_urls = [
+    "https://delivai-shopify-app.onrender.com/auth/callback",
+    "https://delivai-shopify-app.onrender.com/auth/shopify/callback",
+    "http://localhost:3000/auth/callback",
+    "http://localhost:3000/auth/shopify/callback"
+  ]
+
+[webhooks]
+  api_version = "2024-10"
+
+  [[webhooks.subscriptions]]
+    topics = ["app/uninstalled"]
+    uri = "/webhooks"
+
+  [[webhooks.subscriptions]]
+    topics = ["products/update"]
+    uri = "/webhooks"
+
+  [[webhooks.subscriptions]]
+    topics = ["products/create"]
+    uri = "/webhooks"
+
+[pos]
+  embedded = false

@@ -1,0 +1,74 @@
+{% comment %}
+  DelivAI Chat Widget — Theme App Extension App Block
+  Merchants enable this block via the Shopify Theme Editor (Customize → App embeds)
+{% endcomment %}
+
+<script>
+  window.__delivai_config = {
+    appUrl: {{ shop.metafields.delivai.app_url | default: '' | json }},
+    shop: {{ shop.permanent_domain | json }},
+    widgetColor: {{ block.settings.widget_color | default: '#5B4FE8' | json }},
+    widgetPosition: {{ block.settings.widget_position | default: 'bottom-right' | json }},
+    greetingMessage: {{ block.settings.greeting_message | default: "Hi! I can help you track or manage your order." | json }},
+    personaName: {{ block.settings.persona_name | default: 'Aria' | json }},
+    collectEmailUpfront: {{ block.settings.collect_email | default: false }},
+  };
+</script>
+
+{% comment %} Inject customer identity if logged in {% endcomment %}
+{% if customer %}
+<meta name="customer-id" content="{{ customer.id }}">
+<script>
+  window.ShopifyCustomer = {
+    id: "gid://shopify/Customer/{{ customer.id }}",
+    email: {{ customer.email | json }},
+    name: {{ customer.name | json }},
+  };
+</script>
+{% endif %}
+
+{% comment %} Load widget runtime {% endcomment %}
+<script src="{{ 'chat-widget.js' | asset_url }}" defer></script>
+
+{% schema %}
+{
+  "name": "DelivAI Chat",
+  "target": "body",
+  "settings": [
+    {
+      "type": "color",
+      "id": "widget_color",
+      "label": "Widget color",
+      "default": "#5B4FE8"
+    },
+    {
+      "type": "select",
+      "id": "widget_position",
+      "label": "Widget position",
+      "options": [
+        { "value": "bottom-right", "label": "Bottom right" },
+        { "value": "bottom-left",  "label": "Bottom left"  }
+      ],
+      "default": "bottom-right"
+    },
+    {
+      "type": "text",
+      "id": "greeting_message",
+      "label": "Greeting message",
+      "default": "Hi! I can help you track or manage your order. How can I help?"
+    },
+    {
+      "type": "text",
+      "id": "persona_name",
+      "label": "AI assistant name",
+      "default": "Aria"
+    },
+    {
+      "type": "checkbox",
+      "id": "collect_email",
+      "label": "Ask for email upfront",
+      "default": false
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,14 @@
+node_modules
+**/node_modules
+**/.next
+**/.turbo
+**/build
+!apps/shopify-app/build
+**/dist
+!packages/shared-types/dist
+**/.git
+**/.env
+**/.env.local
+**/.DS_Store
+**/coverage
+**/*.log
