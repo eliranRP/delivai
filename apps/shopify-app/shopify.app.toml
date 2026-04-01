@@ -8,7 +8,7 @@ embedded = true
   dev_store_url = "commai-chat.myshopify.com"
 
 [access_scopes]
-  scopes = "read_orders,write_orders,read_customers,write_customers,read_products,read_fulfillments,write_fulfillments"
+  scopes = "read_orders,write_orders,read_customers,write_customers,read_products,read_fulfillments,write_fulfillments,write_themes"
 
 [auth]
   redirect_urls = [
